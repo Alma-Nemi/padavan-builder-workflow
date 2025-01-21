@@ -22,7 +22,7 @@ jobs:
       - name: Install dependencies
         run: |
           apt update
-          apt install -y gcc libssl-dev build-essential wget gawk bison python3 python3-pip
+          apt install -y gcc libssl-dev build-essential wget git gawk bison python3 python3-pip
           wget http://ftp.gnu.org/gnu/libc/glibc-2.34.tar.gz
           tar -xvf glibc-2.34.tar.gz
           cd glibc-2.34
