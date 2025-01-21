@@ -20,7 +20,16 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt install -y gcc libssl-dev
+          sudo apt install -y gcc libssl-dev build-essential
+          wget http://ftp.gnu.org/gnu/libc/glibc-2.34.tar.gz
+          tar -xvf glibc-2.34.tar.gz
+          cd glibc-2.34
+          mkdir build
+          cd build
+          ../configure --prefix=/opt/glibc-2.34
+          make -j$(nproc)
+          sudo make install
+          export LD_LIBRARY_PATH=/opt/glibc-2.34/lib:$LD_LIBRARY_PATH
 
       - name: Get variables
         run: |
@@ -53,6 +62,12 @@ jobs:
 
       - name: Compile the firmware
         run: |
+          MAKEFILE_PATH=$(find . -type f -name "Makefile" | grep "openvpn")
+          if [ -z "$MAKEFILE_PATH" ]; then
+              echo "Error: Makefile not found"
+              exit 1
+          fi
+          sed -i 's/-Wno-stringop-truncation//g' "$MAKEFILE_PATH"
           cd padavan/trunk
           fakeroot ./build_firmware_modify $TNAME 0
           mkdir -p ../firmware
