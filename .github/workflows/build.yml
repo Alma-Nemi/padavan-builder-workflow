@@ -22,7 +22,7 @@ jobs:
       - name: Install dependencies
         run: |
           apt update
-          apt install -y gcc libssl-dev build-essential wget git gawk bison python3 python3-pip libtool autoconf automake flex bison libelf-dev libncurses-dev
+          apt install -y gcc libssl-dev build-essential wget git gawk bison python3 python3-pip libtool autoconf automake flex bison libelf-dev libncurses-dev zlib1g-dev liblzma-dev
           wget http://ftp.gnu.org/gnu/libc/glibc-2.34.tar.gz
           tar -xvf glibc-2.34.tar.gz
           cd glibc-2.34
@@ -60,7 +60,7 @@ jobs:
         run: |
           cd padavan/uboot/mips/uboot-5.x.x.x/tools
           make clean
-          make CC=gcc
+          make V=1 CC=gcc
 
       - name: Apply custom configurations
         run: |
