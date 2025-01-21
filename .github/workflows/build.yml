@@ -1,35 +1,28 @@
-name: Build Firmware
+name: Build firmware
 
 on:
   workflow_dispatch:
   push:
-    branches:
-      - main
+    tags:
+      - '*'
 
 jobs:
   build:
-    runs-on: ubuntu-20.04  # Используем стабильный образ
+    runs-on: ubuntu-latest
+    container: registry.gitlab.com/hadzhioglu/padavan-ng
+    defaults:
+      run:
+        shell: bash
 
     steps:
-      # 1. Checkout репозиторий
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      # 2. Установка зависимостей
       - name: Install dependencies
         run: |
           sudo apt update
-          # Установка GCC 9
-          sudo apt install -y gcc-9 g++-9
-          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 9
-          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-9 9
-          # Установка OpenSSL
-          sudo apt install -y libssl-dev
-          # Проверка версии OpenSSL
-          openssl version
+          sudo apt install -y gcc libssl-dev
 
-      # 3. Загрузка конфигурации
-      - name: Load build configuration
+      - name: Get variables
         run: |
           sed -i 's|\r$||g' variables build.config
           . <(cat variables build.config)
@@ -38,30 +31,36 @@ jobs:
             echo "$v=${!v}" >> $GITHUB_ENV
           done
 
-      # 4. Подготовка исходников и инструментов
-      - name: Prepare sources and toolchain
+      - name: Download sources and toolchain
         run: |
           git config --global --add safe.directory '*'
-          git clone -b "$PADAVAN_BRANCH" "$PADAVAN_REPO"
-          git -C padavan-ng checkout "$PADAVAN_COMMIT"
-          wget -qO- "$PADAVAN_TOOLCHAIN_URL" | tar -C padavan-ng --zstd -xf -
+          git clone -b "$PADAVAN_BRANCH" "$PADAVAN_REPO" padavan
+          cd padavan/toolchain-mipsel
+          chmod +x dl_toolchain.sh
+          ./dl_toolchain.sh
+          cd ../../
 
-      # 5. Сборка прошивки
-      - name: Build firmware
+      - name: Apply custom configurations
         run: |
-          cp build.config padavan-ng/trunk/.config
-          pushd padavan-ng/trunk
-          ./clear_tree.sh
-          # Удаление проблемного флага из Makefile
-          sed -i 's/-Wno-stringop-truncation//g' user/openvpn/openvpn-2.*/Makefile
-          ./build_firmware.sh
-          popd
+          cp build.config padavan/trunk/configs/templates/$TNAME.config
+          cd padavan/trunk
+          if [ -f "../../$CUSTOM_SCRIPT" ]; then
+            cp "../../$CUSTOM_SCRIPT" .
+            chmod +x $CUSTOM_SCRIPT
+            ./$CUSTOM_SCRIPT
+          fi
+          cd ../../
 
-      # 6. Загрузка прошивки
-      - name: Upload firmware artifacts
-        uses: actions/upload-artifact@v3
+      - name: Compile the firmware
+        run: |
+          cd padavan/trunk
+          fakeroot ./build_firmware_modify $TNAME 0
+          mkdir -p ../firmware
+          mv images/*.trx ../firmware/
+          cd ../../
+
+      - name: Upload firmware
+        uses: actions/upload-artifact@v4
         with:
           name: firmware
-          path: |
-            padavan-ng/trunk/images/*.trx
-            padavan-ng/trunk/images/*.zip
+          path: padavan/firmware/*.trx
