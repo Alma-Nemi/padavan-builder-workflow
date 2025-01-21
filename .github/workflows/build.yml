@@ -9,7 +9,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    container: registry.gitlab.com/hadzhioglu/padavan-ng
+    container:
+      image: ubuntu:20.04
+      options: --privileged
     defaults:
       run:
         shell: bash
@@ -19,8 +21,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          sudo apt update
-          sudo apt install -y gcc libssl-dev build-essential
+          apt update
+          apt install -y gcc libssl-dev build-essential wget
           wget http://ftp.gnu.org/gnu/libc/glibc-2.34.tar.gz
           tar -xvf glibc-2.34.tar.gz
           cd glibc-2.34
@@ -28,7 +30,7 @@ jobs:
           cd build
           ../configure --prefix=/opt/glibc-2.34
           make -j$(nproc)
-          sudo make install
+          make install
           export LD_LIBRARY_PATH=/opt/glibc-2.34/lib:$LD_LIBRARY_PATH
 
       - name: Get variables
