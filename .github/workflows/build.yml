@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-20.04  # Используем стабильный образ для совместимости
+    runs-on: ubuntu-20.04
 
     steps:
       # 1. Checkout репозиторий
@@ -19,12 +19,12 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt update
-          # Установка GCC 9 для лучшей совместимости
+          # Установка GCC 9
           sudo apt install -y gcc-9 g++-9
           sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 9
           sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-9 9
-          # Установка OpenSSL версии 1.1.1
-          sudo apt install -y libssl-dev=1.1.1f-1ubuntu2
+          # Установка последней доступной версии OpenSSL
+          sudo apt install -y libssl-dev
           # Проверка версии OpenSSL
           openssl version
 
