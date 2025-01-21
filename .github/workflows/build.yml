@@ -23,7 +23,7 @@ jobs:
           sudo apt install -y gcc-9 g++-9
           sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 9
           sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-9 9
-          # Установка последней доступной версии OpenSSL
+          # Установка актуальной версии OpenSSL
           sudo apt install -y libssl-dev
           # Проверка версии OpenSSL
           openssl version
