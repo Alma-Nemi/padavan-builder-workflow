@@ -59,6 +59,8 @@ jobs:
       - name: Compile tools
         run: |
           cd padavan/uboot/mips/uboot-5.x.x.x/tools
+          echo \"Checking files...\"
+          ls -l
           make clean
           make V=1 CC=gcc
 
