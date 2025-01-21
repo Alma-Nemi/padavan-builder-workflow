@@ -46,6 +46,11 @@ jobs:
         run: |
           git config --global --add safe.directory '*'
           git clone -b "$PADAVAN_BRANCH" "$PADAVAN_REPO" padavan
+          if [ ! -d "padavan/toolchain-mipsel" ]; then
+              echo "Error: Directory 'toolchain-mipsel' not found in repository!"
+              ls -R padavan
+              exit 1
+          fi
           cd padavan/toolchain-mipsel
           chmod +x dl_toolchain.sh
           ./dl_toolchain.sh
