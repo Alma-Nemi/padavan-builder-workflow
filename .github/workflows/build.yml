@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-20.04  # Используем стабильный образ
 
     steps:
       # 1. Checkout репозиторий
@@ -23,7 +23,7 @@ jobs:
           sudo apt install -y gcc-9 g++-9
           sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 9
           sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-9 9
-          # Установка актуальной версии OpenSSL
+          # Установка OpenSSL
           sudo apt install -y libssl-dev
           # Проверка версии OpenSSL
           openssl version
